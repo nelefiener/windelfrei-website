@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tipps</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<style>
+    body {
+        font-family: "Montserrat", sans-serif;
+        background-color: #849a6a;
+        color: #333;
+        padding: 20px;
+
+    }
+
+    h2 {
+        color: #e8f5e9; 
+        
+    }
+
+    input {
+        color: #f6f3ed;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+    }
+
+    textarea {
+        color: #f4ebda;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1em;
+
+    }
+    button {
+    background-color: #418b43;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #418b43;
+  }
+
+  #alle-kommentare p {
+    background-color: #e8f5e9;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px 0;
+  }
+
+  #feedback {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  img {
+    display: block;
+    margin: 20px auto;
+    border-radius: 10px;
+  }
+</style>
+<body>
+  <h2>Hier kannst du deine Erfahrungen und Tipps teilen!</h2>
+  <img src="abhalten.JPG" alt="Familie" width ="300" >
+  <input type="text" id="name" placeholder="Dein Name">
+  <br>
+  <textarea id="kommentar" placeholder="Dein Kommentar"></textarea>
+  <br>
+  <button onclick="speichern()">Abschicken</button>
+  <p id="feedback" style="color: green;"></p>
+
+  <h3>Kommentare:</h3>
+  <div id="alle-kommentare"></div>
+
+  <script>
+    // Dein Firebase-Konfigurationscode
+    const firebaseConfig = {
+      apiKey: "CTIAKxadpOtNtz3evhAIzaSyCnLnH6Xulh8mV78",
+      authDomain: "windelfrei-tipps.firebaseapp.com",
+      projectId: "windelfrei-tipps",
+      storageBucket: "windelfrei-tipps.appspot.com",
+      messagingSenderId: "227294552696",
+      appId: "1:227294552696:web:79b7cfc96b6f737c25c38d"
+    };
+ 
+
+    
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function speichern() {
+      const name = document.getElementById("name").value;
+      const kommentar = document.getElementById("kommentar").value;
+
+      db.collection("kommentare").add({
+        name: name,
+        kommentar: kommentar,
+        zeit: new Date()
+      }).then(() => {
+        document.getElementById("name").value = "";
+        document.getElementById("kommentar").value = "";
+        ladeKommentare();
+
+        const feedback = document.getElementById("feedback");
+        feedback.textContent = "Danke für deinen Kommentar! <3";
+
+        setTimeout(() => {
+            feedback.textContent = "";
+        }, 3000);
+    }).catch((error) => {
+        const feedback = document.getElementById("feedback");
+        feedback.style.color = "red";
+        feedback.textContent = "das hat leider nicht geklappt :( probiere es nochmal";
+
+    });
+        
+      
+   }
+
+    function ladeKommentare() {
+      document.getElementById("alle-kommentare").innerHTML = "";
+      db.collection("kommentare").orderBy("zeit", "desc").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const daten = doc.data();
+          document.getElementById("alle-kommentare").innerHTML +=
+            `<p><strong>${daten.name}</strong>: ${daten.kommentar}</p>`;
+        });
+      });
+    }
+
+    ladeKommentare();
+  </script>
+</body>
+</html>
